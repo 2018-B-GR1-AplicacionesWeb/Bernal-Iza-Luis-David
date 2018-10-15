@@ -25,7 +25,7 @@ console.log(sumarDosNumeros("adrian", true, 3, 4, 5, 6, 7));
 function sumarNNumeros(...numeros) {
 
     var respuesta = sumarNumerosDesdeUnArreglo(numeros);
-    console.log('respuesta',respuesta)
+
     if (respuesta.noEsNumber) {
         console.error('No envia numeros');
         return 0;
@@ -55,22 +55,33 @@ function sumarNumerosDesdeUnArreglo(numeros) {
 }
 
 console.log(sumarNNumeros(1, 2, 3, 4, 5));
+console.log(sumarNNumeros(1, 2, 3, 4, "asd"));
 
-function saludarEnUpperCase(nombre, funcion){
-    funcion();
-    return `hola ${funcion(nombre)}`; //template Strings
+
+function saludarEnUpperCase(nombre, funcion) {
+    return `Hola ${funcion(nombre)}`; // template strings
 }
 
-console.log(saludarEnUpperCase("david"));
-console.log(saludarEnUpperCase("david",convertirStringEnMayuscula));
-console.log(saludarEnUpperCase("LUIS",convertirStringEnMinusculas));
-console.log(saludarEnUpperCase("Buen Dia", anadirPuntoAlFinal));
+console.log(saludarEnUpperCase("adrian", convertirStringEnMayuscula));
+console.log(saludarEnUpperCase("VICENTE", convertirStringEnMinuscula));
+console.log(saludarEnUpperCase("Buen dia", anadirPuntoAlFinal));
 
 function convertirStringEnMayuscula(texto) {
     return texto.toUpperCase();
 }
-function convertirStringEnMinusculas(texto) {
+
+function convertirStringEnMinuscula(texto) {
     return texto.toLowerCase();
-}function anadirPuntoAlFinal(texto) {
-    return texto+".";
 }
+
+function anadirPuntoAlFinal(texto) {
+    return texto + ".";
+}
+
+function primeraLetraEnMayuscula(texto) {
+    var primeraLetraMayuscula = texto[0].toUpperCase();
+    var restoPalabra = texto.slice(1, texto.length);
+    return primeraLetraMayuscula + restoPalabra;
+}
+console.log(saludarEnUpperCase("adrian",primeraLetraEnMayuscula));
+
