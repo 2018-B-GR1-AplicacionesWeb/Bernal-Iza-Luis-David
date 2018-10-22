@@ -113,8 +113,8 @@ const resultadoReduce = arregloNumeros
     );
 console.log(resultadoReduce);
 
-const resultadoReduceV2 = arregloNumeros
-    .reduce((a,b)=>a+b,0);
+//const resultadoReduceV2 = arregloNumeros
+  //  .reduce((a,b)=>a+b,0);
 
 const resultadoReduceV3 = arregloNumeros.reduceRight((a, b) => {
         if(indice>4){
@@ -125,3 +125,10 @@ const resultadoReduceV3 = arregloNumeros.reduceRight((a, b) => {
     },0
 );
 console.log(resultadoReduceV3);
+
+//sort
+const clonArregloNumeros = JSON.parse(JSON.stringify(arregloNumeros));
+const resultadoSort = arregloNumeros.sort((a,b) => a-b);
+const resultadoSortV2 = conArregloNumeros.sort((a,b) => b-a);
+console.log(resultadoSort);
+console.log(resultadoSortV2);
