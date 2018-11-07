@@ -1,4 +1,4 @@
-//tipados Int edad =1 ;
+nof//tipados Int edad =1 ;
 var edad = 1; //
 var sueldo = 1.01;
 var nombre = "David";
