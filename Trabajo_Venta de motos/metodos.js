@@ -1,12 +1,14 @@
-declare var require;
+"use strict";
+
+//declare var require;
 const inquirer = require('inquirer');
 const fs = require('fs');
 
 const moto = {
- "marca" = "",
- "modelo" = "",
- "anio" = "",
- "color" = ""
+    "marca" = "",
+    "modelo" = "",
+    "anio" = "",
+    "color" = ""
 }
 
 const fs = require('fs');
@@ -32,12 +34,12 @@ const escribirArchivo = (contenidoLeido, motoNueva) => {
             const contenido = contenidoLeido ? contenidoLeido + motoNueva : motoNueva;
 
             fs.writeFile(NombreArchivo, contenido, (err,) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(contenido);
-                    }
-                });
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(contenido);
+                }
+            });
         }
     );
 };
@@ -48,27 +50,27 @@ const buscarArchivo = (contenidoLeido, razon, llave) => {
             const obj = Json.parse(contenidoLeido);
             if(razon === 'marca'){
                 obj['listaDeMotos'].forEach((valorActual,indiceActual, arreglo)=>
-                    const str = JSON.stringify(obj['listaDeMotos'][indiceActual].marca);
+                const str = JSON.stringify(obj['listaDeMotos'][indiceActual].marca);
                 if (str === llave){
                     let respuesta = JSON.stringify(obj['listaDeMotos'][indiceActual]);
                 }
-                )
+            )
             }else if (razon === 'anio'){
                 obj['listaDeMotos'].forEach((valorActual,indiceActual, arreglo)=>
                 const str = JSON.stringify(obj['listaDeMotos'][indiceActual].anio);
                 if (str === llave){
                     let respuesta = JSON.stringify(obj['listaDeMotos'][indiceActual]);
 
-            }         }
+                }         }
             if(respuesta) {
                 resolve(respuesta);
             } else {
                 console.log('No existe');
                 reject();
             }
-            }
         }
-    );
+}
+);
 };
 
 module.exports = {
@@ -94,7 +96,27 @@ const menu = [{type= 'list',name='menu',message='Que quieres hacer?', choice = o
 
 const opciones = ['Ingresar moto','Buscar moto','actualizar moto', 'Eliminar moto'];
 
+const preguntasIngresar = [
+    {type= 'input',name='marca',message='Ingrese el nombre de la marca'},
+    {type= 'input',name='modelo',message='Ingrese el modelo'},
+    {type= 'input',name='anio',message='Ingrese año'},
+
+]
 
 
+inquirer.prompt(menu){
+.then(opcionSelecionada){
+        switch (opcionSelecionada.menu) {
+            case 'Ingresar moto':
+                inquirer.prompt(preguntasIngresar)
+                break;
+            case 'Buscar moto':
+                break;
+            case 'actualizar moto':
+                break;
+            case 'Eliminar moto':
+                break;
+        }
+    }
 
-inquirer.pro
+}
