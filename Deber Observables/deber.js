@@ -1,51 +1,253 @@
-//import {paquete Uno, paquete DOS} from 'rxjs';
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var inquirer = require('inquirer');
+var fs = require('fs');
+var rxjs = require('rxjs');
+var timer = require('rxjs').timer;
+var mergeMap = require('rxjs/operators').mergeMap;
+var map = require('rxjs/operators').map;
+var nombreDelArchivo = 'bdd.json';
+var preguntaMenu = {
+    type: 'list',
+    name: 'opcionMenu',
+    message: '¿Que quieres hacer? ',
+    choices: [
+        'Crear',
+        'Borrar',
+        'Buscar',
+        'Actualizar',
+    ]
 };
-const rxjs = require('rxjs');
-const map = require('rxjs/operators').map;
-const disctinct = require('rxjs/operators').distinct;
-const observableUnos$ = rxjs.of([1, 2, 3], "hola", 3, true, { nombre: 'David' }, new Date(), 3, 3, 3, 3);
-//en el parentesis es lo que mandamos
-//rxjs.of devuelve un observable
-console.log(observableUnos$);
-observableUnos$
-    .pipe(disctinct(), map((valor) => {
-    console.log('Valor', valor);
-    return {
-        data: valor
-    };
-}))
-    .subscribe((ok) => {
-    console.log(ok);
-}, (error) => {
-    console.log(error);
-}, () => {
-    console.log('Completado');
-});
-const promesa1 = () => {
-    // @ts-ignore
-    return new Promise((resolve, reject) => {
-        resolve(':)');
+var preguntaBuscarUsuario = [
+    {
+        type: 'input',
+        name: 'idUsuario',
+        message: 'Ingrese ID Usuario: ',
+    }
+];
+var preguntaEliminarPorNombre = [
+    {
+        type: 'input',
+        name: 'nombre',
+        message: '¿Cuál es el usuario que quiere eliminar? ',
+    }
+];
+var preguntaBuscarNombreUsuario = [
+    {
+        type: 'input',
+        name: 'nombre',
+        message: 'Ingrese nombre de Usuario a Buscar: ',
+    }
+];
+var preguntaUsuario = [
+    {
+        type: 'input',
+        name: 'id',
+        message: '¿Cual es tu id? '
+    },
+    {
+        type: 'input',
+        name: 'nombre',
+        message: '¿Cual es tu nombre? '
+    },
+];
+var preguntaEdicionUsuario = [
+    {
+        type: 'input',
+        name: 'nombre',
+        message: 'Cual es el nuevo nombre? '
+    },
+];
+var preguntaMotos = [
+    {
+        type: 'input',
+        name: 'id',
+        message: '¿id Moto? '
+    },
+    {
+        type: 'input',
+        name: 'nombre',
+        message: '¿Nombre del Moto? '
+    },
+    {}
+];
+// INCIALIZACION BASE
+function inicialiarBDD() {
+    return new Promise(function (resolve, reject) {
+        fs.readFile(nombreDelArchivo, 'utf-8', function (error, contenidoArchivo) {
+            if (error) {
+                fs.writeFile(nombreDelArchivo, '{"usuarios":[],"motos":[]}', function (error) {
+                    if (error) {
+                        reject({
+                            mensaje: 'ERROR AL CREAR BASE',
+                            error: 500
+                        });
+                    }
+                    else {
+                        resolve({
+                            mensaje: 'BDD LEÍDA',
+                            bdd: JSON.parse('{"usuarios":[],"motos":[]}')
+                        });
+                    }
+                });
+            }
+            else {
+                resolve({
+                    mensaje: 'BDD LEÍDA',
+                    bdd: JSON.parse(contenidoArchivo)
+                });
+            }
+        });
     });
-};
-//hack-life
-function ejecutarCodigoSyncrono() {
-    return __awaiter(this, void 0, void 0, function* () {
-        console.log('Inicio');
-        //Promesa --> ejecutar
-        try {
-            const resultadoPromesita = yield promesa1();
-            console.log(resultadoPromesita);
-        }
-        catch (e) {
-            console.log('Error en la promesita', e);
-        }
-        console.log('Fin');
+}
+//MAIN
+function main() {
+    var respuestaBDD$ = rxjs.from(inicialiarBDD());
+    respuestaBDD$
+        .pipe(preguntarOpcionesMenu(), opcionesRespuesta(), ejecutarAct(), guardarBaseDDD())
+        .subscribe(function (data) {
+        //
+        console.log(data);
+    }, function (error) {
+        //
+        console.log(error);
+    }, function () {
+        main();
+        console.log('Complete');
     });
+}
+// .PIPE
+function guardarBDD(bdd) {
+    return new Promise(function (resolve, reject) {
+        fs.writeFile(nombreDelArchivo, JSON.stringify(bdd), function (error) {
+            if (error) {
+                reject({
+                    mensaje: 'Error creando',
+                    error: 500
+                });
+            }
+            else {
+                resolve({
+                    mensaje: 'BDD guardada',
+                    bdd: bdd
+                });
+            }
+        });
+    });
+}
+main();
+function preguntarOpcionesMenu() {
+    return mergeMap(function (respuestaBDD) {
+        return rxjs
+            .from(inquirer.prompt(preguntaMenu))
+            .pipe(map(// respuesta ant obs
+        function (respuesta) {
+            respuestaBDD.opcionMenu = respuesta;
+            return respuestaBDD;
+            // Cualquier cosa JS
+        }));
+    });
+}
+function opcionesRespuesta() {
+    return mergeMap(function (respuestaBDD) {
+        var opcion = respuestaBDD.opcionMenu.opcionMenu;
+        switch (opcion) {
+            case 'Crear':
+                return rxjs
+                    .from(inquirer.prompt(preguntaUsuario))
+                    .pipe(map(function (usuario) {
+                    respuestaBDD.usuario = usuario;
+                    return respuestaBDD;
+                }));
+            case 'Buscar':
+                return buscarUsuarioPorNombre(respuestaBDD);
+                break;
+            case 'Actualizar':
+                return preguntarIdUsuario(respuestaBDD);
+            case 'Borrar':
+                return eliminarPorNombre(respuestaBDD);
+                break;
+        }
+    });
+}
+function guardarBaseDDD() {
+    return mergeMap(// Respuesta del anterior OBS
+    function (respuestaBDD) {
+        // OBS
+        return rxjs.from(guardarBDD(respuestaBDD.bdd));
+    });
+}
+function ejecutarAct() {
+    return map(// Respuesta del anterior OBS
+    function (respuestaBDD) {
+        var opcion = respuestaBDD.opcionMenu.opcionMenu;
+        switch (opcion) {
+            case 'Crear':
+                var usuario = respuestaBDD.usuario;
+                respuestaBDD.bdd.usuarios.push(usuario);
+                return respuestaBDD;
+            case 'Actualizar':
+                var indice = respuestaBDD.indiceUsuario;
+                respuestaBDD.bdd.usuarios[indice].nombre = respuestaBDD.usuario.nombre;
+                return respuestaBDD;
+            case 'Buscar':
+                console.log(respuestaBDD.bdd);
+                console.log('Usuario Encontrado: ', respuestaBDD.usuario);
+                return respuestaBDD;
+            case 'Borrar':
+                console.log('Usuario Eliminado correctamente:', respuestaBDD.bdd.usuarios);
+                return respuestaBDD;
+        }
+    });
+}
+function preguntarIdUsuario(respuestaBDD) {
+    return rxjs
+        .from(inquirer.prompt(preguntaBuscarUsuario))
+        .pipe(mergeMap(// RESP ANT OBS
+    function (respuesta) {
+        var indiceUsuario = respuestaBDD.bdd
+            .usuarios
+            .findIndex(// -1
+        function (usuario) {
+            return usuario.id === respuesta.idUsuario;
+        });
+        if (indiceUsuario === -1) {
+            console.log('preguntando de nuevo');
+            return preguntarIdUsuario(respuestaBDD);
+        }
+        else {
+            respuestaBDD.indiceUsuario = indiceUsuario;
+            return rxjs
+                .from(inquirer.prompt(preguntaEdicionUsuario))
+                .pipe(map(function (nombre) {
+                respuestaBDD.usuario = {
+                    id: null,
+                    nombre: nombre.nombre
+                };
+                return respuestaBDD;
+            }));
+        }
+    }));
+}
+function buscarUsuarioPorNombre(respuestaBDD) {
+    return rxjs
+        .from(inquirer.prompt(preguntaBuscarNombreUsuario))
+        .pipe(mergeMap(// RESP ANT OBS
+    function (respuesta) {
+        var usuarioEncontrado = respuestaBDD.bdd.usuarios
+            .find(function (usuario) {
+            return usuario.nombre === respuesta.nombre;
+        });
+        respuestaBDD.usuario = usuarioEncontrado;
+        return rxjs.of(respuestaBDD);
+    }));
+}
+function eliminarPorNombre(respuestaBDD) {
+    return rxjs.from(inquirer.prompt(preguntaEliminarPorNombre))
+        .pipe(mergeMap(function (respuesta) {
+        var indiceDelNombre = respuestaBDD.bdd.usuarios.findIndex(function (usuario) {
+            return usuario.nombre === respuesta.nombre;
+        });
+        console.log(indiceDelNombre);
+        var resultadoSplice = respuestaBDD.bdd.usuarios.splice(indiceDelNombre, 1);
+        return rxjs.of(respuestaBDD);
+    }));
 }
