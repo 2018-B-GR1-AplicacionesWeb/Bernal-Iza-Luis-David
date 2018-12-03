@@ -1,9 +1,9 @@
-const inquirer = require('inquirer');
-const fs = require('fs');
-const rxjs = require('rxjs');
-const mergeMap = require('rxjs/operators').mergeMap;
-const map = require('rxjs/operators').map;
-const preguntaMenu = {
+var inquirer = require('inquirer');
+var fs = require('fs');
+var rxjs = require('rxjs');
+var mergeMap = require('rxjs/operators').mergeMap;
+var map = require('rxjs/operators').map;
+var preguntaMenu = {
     type: 'list',
     name: 'opcionMenu',
     message: 'Que quieres hacer',
@@ -14,7 +14,7 @@ const preguntaMenu = {
         'Actualizar',
     ]
 };
-const preguntaUsuario = [
+var preguntaUsuario = [
     {
         type: 'input',
         name: 'id',
@@ -26,14 +26,14 @@ const preguntaUsuario = [
         message: 'Cual es tu nombre'
     },
 ];
-const preguntaUsuarioBusquedaPorNombre = [
+var preguntaUsuarioBusquedaPorNombre = [
     {
         type: 'input',
         name: 'nombre',
         message: 'Escribe el nombre del usuario a buscar'
     }
 ];
-const preguntaUsuarioNuevoNombre = [
+var preguntaUsuarioNuevoNombre = [
     {
         type: 'input',
         name: 'nombre',
@@ -44,22 +44,22 @@ function main() {
     console.log('Empezo');
     inicializarBase()
         .pipe(mergeMap(// preguntar opcion
-    (respuestaBDD) => {
+    function (respuestaBDD) {
         return preguntarMenu()
-            .pipe(map((respuesta) => {
+            .pipe(map(function (respuesta) {
             return {
                 respuestaUsuario: respuesta,
-                respuestaBDD
+                respuestaBDD: respuestaBDD
             };
         }));
     }), // dependiendo de la opcion PREGUNTAMOS DEPENDIENDO LAS OPCIONES
-    mergeMap((respuesta) => {
+    mergeMap(function (respuesta) {
         console.log(respuesta);
         switch (respuesta.respuestaUsuario.opcionMenu) {
             case 'Crear':
                 return rxjs
                     .from(inquirer.prompt(preguntaUsuario))
-                    .pipe(map((usuario) => {
+                    .pipe(map(function (usuario) {
                     respuesta.usuario = usuario;
                     return respuesta;
                 }));
@@ -71,23 +71,23 @@ function main() {
                 rxjs.of(respuesta);
         }
     }), // Ejecutar Accion
-    map((respuesta) => {
+    map(function (respuesta) {
         console.log('respuesta en accion', respuesta);
         switch (respuesta.respuestaUsuario.opcionMenu) {
             case 'Crear':
-                const usuario = respuesta.usuario;
+                var usuario = respuesta.usuario;
                 respuesta.respuestaBDD.bdd.usuarios.push(usuario);
                 return respuesta;
         }
     }), // Guardar Base de Datos
-    mergeMap((respuesta) => {
+    mergeMap(function (respuesta) {
         return guardarBase(respuesta.respuestaBDD.bdd);
     }))
-        .subscribe((mensaje) => {
+        .subscribe(function (mensaje) {
         console.log(mensaje);
-    }, (error) => {
+    }, function (error) {
         console.log(error);
-    }, () => {
+    }, function () {
         console.log('Completado');
         main();
     });
@@ -114,9 +114,9 @@ function main() {
     */
 }
 function inicializarBase() {
-    const leerBDD$ = rxjs.from(leerBDD());
+    var leerBDD$ = rxjs.from(leerBDD());
     return leerBDD$
-        .pipe(mergeMap((respuestaLeerBDD) => {
+        .pipe(mergeMap(function (respuestaLeerBDD) {
         if (respuestaLeerBDD.bdd) {
             // truty / {}
             return rxjs.of(respuestaLeerBDD);
@@ -152,8 +152,8 @@ function preguntarMenu() {
     return rxjs.from(inquirer.prompt(preguntaMenu));
 }
 function leerBDD() {
-    return new Promise((resolve) => {
-        fs.readFile('bdd.json', 'utf-8', (error, contenidoLeido) => {
+    return new Promise(function (resolve) {
+        fs.readFile('bdd.json', 'utf-8', function (error, contenidoLeido) {
             if (error) {
                 resolve({
                     mensaje: 'Base de datos vacia',
@@ -170,9 +170,9 @@ function leerBDD() {
     });
 }
 function crearBDD() {
-    const contenidoInicialBDD = '{"usuarios":[],"mascotas":[]}';
-    return new Promise((resolve, reject) => {
-        fs.writeFile('bdd.json', contenidoInicialBDD, (err) => {
+    var contenidoInicialBDD = '{"usuarios":[],"mascotas":[]}';
+    return new Promise(function (resolve, reject) {
+        fs.writeFile('bdd.json', contenidoInicialBDD, function (err) {
             if (err) {
                 reject({
                     mensaje: 'Error creando Base',
@@ -189,8 +189,8 @@ function crearBDD() {
     });
 }
 function guardarBase(bdd) {
-    return new Promise((resolve, reject) => {
-        fs.writeFile('bdd.json', JSON.stringify(bdd), (err) => {
+    return new Promise(function (resolve, reject) {
+        fs.writeFile('bdd.json', JSON.stringify(bdd), function (err) {
             if (err) {
                 reject({
                     mensaje: 'Error guardando BDD',
@@ -206,15 +206,15 @@ function guardarBase(bdd) {
     });
 }
 function anadirUsuario(usuario) {
-    return new Promise((resolve, reject) => {
-        fs.readFile('bdd.json', 'utf-8', (err, contenido) => {
+    return new Promise(function (resolve, reject) {
+        fs.readFile('bdd.json', 'utf-8', function (err, contenido) {
             if (err) {
                 reject({ mensaje: 'Error leyendo' });
             }
             else {
-                const bdd = JSON.parse(contenido);
+                var bdd = JSON.parse(contenido);
                 bdd.usuarios.push(usuario);
-                fs.writeFile('bdd.json', JSON.stringify(bdd), (err) => {
+                fs.writeFile('bdd.json', JSON.stringify(bdd), function (err) {
                     if (err) {
                         reject(err);
                     }
@@ -227,19 +227,19 @@ function anadirUsuario(usuario) {
     });
 }
 function editarUsuario(nombre, nuevoNombre) {
-    return new Promise((resolve, reject) => {
-        fs.readFile('bdd.json', 'utf-8', (err, contenido) => {
+    return new Promise(function (resolve, reject) {
+        fs.readFile('bdd.json', 'utf-8', function (err, contenido) {
             if (err) {
                 reject({ mensaje: 'Error leyendo' });
             }
             else {
-                const bdd = JSON.parse(contenido);
-                const indiceUsuario = bdd.usuarios
-                    .findIndex((usuario) => {
+                var bdd = JSON.parse(contenido);
+                var indiceUsuario = bdd.usuarios
+                    .findIndex(function (usuario) {
                     return usuario.nombre = nombre;
                 });
                 bdd.usuarios[indiceUsuario].nombre = nuevoNombre;
-                fs.writeFile('bdd.json', JSON.stringify(bdd), (err) => {
+                fs.writeFile('bdd.json', JSON.stringify(bdd), function (err) {
                     if (err) {
                         reject(err);
                     }
@@ -252,15 +252,15 @@ function editarUsuario(nombre, nuevoNombre) {
     });
 }
 function buscarUsuarioPorNombre(nombre) {
-    return new Promise((resolve, reject) => {
-        fs.readFile('bdd.json', 'utf-8', (err, contenido) => {
+    return new Promise(function (resolve, reject) {
+        fs.readFile('bdd.json', 'utf-8', function (err, contenido) {
             if (err) {
                 reject({ mensaje: 'Error leyendo' });
             }
             else {
-                const bdd = JSON.parse(contenido);
-                const respuestaFind = bdd.usuarios
-                    .find((usuario) => {
+                var bdd = JSON.parse(contenido);
+                var respuestaFind = bdd.usuarios
+                    .find(function (usuario) {
                     return usuario.nombre === nombre;
                 });
                 resolve(respuestaFind);

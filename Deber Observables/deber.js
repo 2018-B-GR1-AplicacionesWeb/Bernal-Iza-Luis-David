@@ -5,6 +5,7 @@ var timer = require('rxjs').timer;
 var mergeMap = require('rxjs/operators').mergeMap;
 var map = require('rxjs/operators').map;
 var nombreDelArchivo = 'bdd.json';
+
 var preguntaMenu = {
     type: 'list',
     name: 'opcionMenu',
