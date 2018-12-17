@@ -22,7 +22,7 @@ describe('AppController', () => {
     describe('root', () => {
         it('should return "Hello World!"', () => {
             const appController = app.get(app_controller_1.AppController);
-            expect(appController.getHello()).toBe('Hello World!');
+            expect(appController).toBe('Hello World!');
         });
     });
 });

@@ -23,9 +23,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const app_service_1 = require("./app.service");
 const rxjs_1 = require("rxjs");
+const noticia_service_1 = require("./noticia.service");
 let AppController = class AppController {
-    constructor(_appService) {
+    constructor(_appService, _noticiaService) {
         this._appService = _appService;
+        this._noticiaService = _noticiaService;
     }
     raiz(todosQueryParams, nombre) {
         console.log(todosQueryParams);
@@ -35,10 +37,14 @@ let AppController = class AppController {
         return id;
     }
     adiosMundo() {
-        return 'Adios Mundo';
+        return 'Adios mundo';
     }
-    adiosMundoPOST() {
-        return 'Adios Mundo POST';
+    adiosMundoPOST(response) {
+        response.render('inicio', {
+            usuario: 'Adrian',
+            arreglo: [],
+            booleano: true,
+        });
     }
     adiosMundoPromesa() {
         const promesaAdios = () => {
@@ -91,25 +97,46 @@ let AppController = class AppController {
             });
         }
     }
-    inicio(response) {
+    inicio(response, accion, titulo) {
+        let mensaje = undefined;
+        if (accion && titulo) {
+            switch (accion) {
+                case 'borrar':
+                    mensaje = `Registro ${titulo} eliminado`;
+            }
+        }
         response.render('inicio', {
-            usuario: 'David',
-            arreglo: [
-                {
-                    titulo: 'A',
-                    descripcion: 'asd asda asd asd asd'
-                },
-                {
-                    titulo: 'B',
-                    descripcion: 'asd asda asd asd asd'
-                },
-                {
-                    titulo: 'C',
-                    descripcion: 'asd asda asd asd asd'
-                }
-            ],
-            boolean: true,
+            usuario: 'Adrian',
+            arreglo: this._noticiaService.arreglo,
+            booleano: false,
+            mensaje: mensaje
         });
+    }
+    eliminar(response, idNoticia) {
+        const noticiaBorrada = this._noticiaService
+            .eliminar(Number(idNoticia));
+        const parametrosConsulta = `?accion=borrar&titulo=${noticiaBorrada.titulo}`;
+        response.redirect('/inicio' + parametrosConsulta);
+    }
+    crearNoticiaRuta(response) {
+        response.render('crear-noticia');
+    }
+    crearNoticiaFuncion(response, noticia) {
+        this._noticiaService.crear(noticia);
+        response.redirect('/inicio');
+    }
+    actualizarNoticiaVista(response, idNoticia) {
+        const noticiaEncontrada = this._noticiaService
+            .buscarPorId(+idNoticia);
+        response
+            .render('crear-noticia', {
+            noticia: noticiaEncontrada
+        });
+    }
+    actualizarNoticiaMetedo(response, idNoticia, noticia) {
+        noticia.id = +idNoticia;
+        this._noticiaService.actualizar(+idNoticia, noticia);
+        response.redirect('/inicio');
     }
 };
 __decorate([
@@ -136,9 +163,10 @@ __decorate([
 ], AppController.prototype, "adiosMundo", null);
 __decorate([
     common_1.Post('adiosMundo'),
+    __param(0, common_1.Res()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", String)
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
 ], AppController.prototype, "adiosMundoPOST", null);
 __decorate([
     common_1.Get('adiosMundoPromesa'),
@@ -175,13 +203,56 @@ __decorate([
 __decorate([
     common_1.Get('inicio'),
     __param(0, common_1.Res()),
+    __param(1, common_1.Query('accion')),
+    __param(2, common_1.Query('titulo')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "inicio", null);
+__decorate([
+    common_1.Post('eliminar/:idNoticia'),
+    __param(0, common_1.Res()),
+    __param(1, common_1.Param('idNoticia')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "eliminar", null);
+__decorate([
+    common_1.Get('crear-noticia'),
+    __param(0, common_1.Res()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
-], AppController.prototype, "inicio", null);
+], AppController.prototype, "crearNoticiaRuta", null);
+__decorate([
+    common_1.Post('crear-noticia'),
+    __param(0, common_1.Res()),
+    __param(1, common_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "crearNoticiaFuncion", null);
+__decorate([
+    common_1.Get('actualizar-noticia/:idNoticia'),
+    __param(0, common_1.Res()),
+    __param(1, common_1.Param('idNoticia')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "actualizarNoticiaVista", null);
+__decorate([
+    common_1.Post('actualizar-noticia/:idNoticia'),
+    __param(0, common_1.Res()),
+    __param(1, common_1.Param('idNoticia')),
+    __param(2, common_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "actualizarNoticiaMetedo", null);
 AppController = __decorate([
     common_1.Controller(),
-    __metadata("design:paramtypes", [app_service_1.AppService])
+    __metadata("design:paramtypes", [app_service_1.AppService,
+        noticia_service_1.NoticiaService])
 ], AppController);
 exports.AppController = AppController;
 //# sourceMappingURL=app.controller.js.map
