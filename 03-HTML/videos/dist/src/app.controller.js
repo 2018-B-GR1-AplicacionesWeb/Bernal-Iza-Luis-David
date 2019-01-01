@@ -99,10 +99,17 @@ let AppController = class AppController {
     }
     inicio(response, accion, titulo) {
         let mensaje = undefined;
-        if (accion && titulo) {
+        if (accion) {
             switch (accion) {
                 case 'borrar':
                     mensaje = `Registro ${titulo} eliminado`;
+                    break;
+                case 'actualizar':
+                    mensaje = `Registro ${titulo} actualizado`;
+                    break;
+                case 'crear':
+                    mensaje = `Registro ${titulo} creado`;
+                    break;
             }
         }
         response.render('inicio', {
@@ -122,8 +129,9 @@ let AppController = class AppController {
         response.render('crear-noticia');
     }
     crearNoticiaFuncion(response, noticia) {
-        this._noticiaService.crear(noticia);
-        response.redirect('/inicio');
+        const noticiaCreada = this._noticiaService.crear(noticia);
+        const parametrosConsulta1 = `?accion=crear&titulo=${noticiaCreada.titulo}`;
+        response.redirect('/inicio' + parametrosConsulta1);
     }
     actualizarNoticiaVista(response, idNoticia) {
         const noticiaEncontrada = this._noticiaService
@@ -135,8 +143,9 @@ let AppController = class AppController {
     }
     actualizarNoticiaMetedo(response, idNoticia, noticia) {
         noticia.id = +idNoticia;
-        this._noticiaService.actualizar(+idNoticia, noticia);
-        response.redirect('/inicio');
+        const noticiaActualizada = this._noticiaService.actualizar(+idNoticia, noticia);
+        const parametrosConsulta = `?accion=actualizar&titulo=${noticiaActualizada.titulo}`;
+        response.redirect('/inicio' + parametrosConsulta);
     }
 };
 __decorate([

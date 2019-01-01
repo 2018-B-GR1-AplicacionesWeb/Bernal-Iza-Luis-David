@@ -20,13 +20,11 @@ import {NoticiaService} from "./noticia.service";
 // http://localhost:3000/usuario
 export class AppController {
 
-
     // public servicio:AppService;
     constructor(private readonly _appService: AppService,
                 private readonly _noticiaService: NoticiaService) {  // NO ES UN CONSTRUCTOR
         // this.servicio = servicio;
     }
-
 
     @Get() // http://ip:puerto
     // @Get('crear')
@@ -153,10 +151,17 @@ export class AppController {
         @Query('titulo') titulo: string
     ) {
         let mensaje = undefined;
-        if (accion && titulo) {
+        if (accion) {
             switch (accion) {
                 case 'borrar':
-                    mensaje = `Registro ${titulo} eliminado`;
+                    mensaje = `Registro ${titulo} eliminado`
+                    break;
+                case 'actualizar':
+                    mensaje = `Registro ${titulo} actualizado`
+                    break;
+                case 'crear':
+                    mensaje = `Registro ${titulo} creado`
+                    break;
             }
         }
 
@@ -201,10 +206,14 @@ export class AppController {
         @Res() response,
         @Body() noticia: Noticia
     ) {
-        this._noticiaService.crear(noticia);
+        const noticiaCreada = this._noticiaService.crear(noticia);
+
+        const parametrosConsulta1 = `?accion=crear&titulo=${
+            noticiaCreada.titulo
+            }`;
 
         response.redirect(
-            '/inicio'
+            '/inicio'+parametrosConsulta1
         )
     }
 
@@ -236,9 +245,13 @@ export class AppController {
         @Body() noticia: Noticia
     ) {
         noticia.id = +idNoticia;
-        this._noticiaService.actualizar(+idNoticia, noticia);
+        const noticiaActualizada = this._noticiaService.actualizar(+idNoticia, noticia);
 
-        response.redirect('/inicio');
+        const parametrosConsulta = `?accion=actualizar&titulo=${
+            noticiaActualizada.titulo
+            }`;
+
+        response.redirect('/inicio'+parametrosConsulta);
 
     }
 
