@@ -1,0 +1,47 @@
+<% const estaCreando=typeof usuario === "undefined"%>
+
+<h1>Venta de motos</h1>
+
+<h1><%= estaCreando? 'Crear':'Actualizar'%> Usuario</h1>
+
+<form action="/<%= estaCreando ? 'crear' : 'actualizar' %>usuario/<%= estaCreando ? '' : usuario.id %>"
+      method="POST">
+    <div>
+        <label for="nombre">Nombre:</label>
+        <input id="nombre"
+               type="text"
+               name="nombre"
+               value="<%= estaCreando ? '' : usuario.nombre%>">
+    </div>
+    <br>
+    <div>
+        <label for="apellido">Apellido:</label>
+        <input id="apellido"
+               type="text"
+               name="apellido"
+               value="<%= estaCreando? '' : usuario.apellido%>">
+    </div>
+    <br>
+    <div>
+        <label for="cedula">Cédula:</label>
+        <input id="cedula"
+               type="text"
+               name="cedula"
+               value="<%= estaCreando? '' : usuario.cedula%>">
+    </div>
+    <br>
+    <div>
+        <label for="telefono">Teléfono:</label>
+        <input id="telefono"
+               type="text"
+               name="telefono"
+               value="<%= estaCreando ? '' : usuario.telefono%>">
+    </div>
+    <br>
+    <button><%= estaCreando ? 'Crear' : 'Actualizar'%> Usuario</button>
+
+</form>
+
+<a href="/listaClientes">
+    <button>Regresar</button>
+</a>

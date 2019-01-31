@@ -1,0 +1,73 @@
+/*
+
+      la sintaxis de css siempre es asi
+       BUSQUEDA {
+           PROPIEDAD: VALOR-PROPIEDAD;
+           PROPIEDAD: VALOR-PROPIEDAD;
+           PROPIEDAD: VALOR-PROPIEDAD;
+           PROPIEDAD: VALOR-PROPIEDAD;
+           PROPIEDAD: VALOR-PROPIEDAD;
+       }
+       ETIQUETAS {
+
+       }
+       CLASSES {
+
+       }
+       ID {
+
+       }
+
+       Orden de importancia
+
+       primero esta el identificador
+       segundo las busquedas complejas
+       terceo esta la clase
+       cuarto la etiqueta
+
+       Busquedas complejas
+
+       etiqueta.class{
+
+       }
+
+       etiqueta.class.class.class.class{
+
+       }
+
+       etiqueta_antes + Etiqueta_despues{
+
+       }
+
+       etiqueta_papa > Etiqueta_hijo > Etiqueta_nieto
+
+
+       */
+p {
+    background-color: aliceblue;
+}
+.rojo {
+    background-color: red;
+}
+#titulo {
+    background-color: green;
+}
+
+p.amarillo{
+    background-color: pink;
+}
+
+p.amarillo.azul{
+    background-color: black;
+    color: white;
+}
+h1+p{
+    background-color: green;
+}
+
+h1.amarillo + p.amarillo{
+    background-color: orange;
+}
+ul > li >span {
+    background-color: purple;
+}

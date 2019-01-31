@@ -8,23 +8,27 @@ import {
     Query,
     Param,
     Body,
-    Head, UnauthorizedException, Req, Res
+    Head, UnauthorizedException, Req, Res, Session
 } from '@nestjs/common';
 import {AppService} from './app.service';
 import {Observable, of} from "rxjs";
 import {Request, Response} from "express";
-import {NoticiaService} from "./noticia.service";
+import {NoticiaService} from "./noticia/noticia.service";
+import {UsuarioService} from "./usuario/usuario.service";
 
 @Controller()  //decoradores
 // Controller('usuario')
 // http://localhost:3000/usuario
 export class AppController {
 
+
     // public servicio:AppService;
     constructor(private readonly _appService: AppService,
-                private readonly _noticiaService: NoticiaService) {  // NO ES UN CONSTRUCTOR
+                private readonly _noticiaService: NoticiaService,   // NO ES UN CONSTRUCTOR
+                private readonly _usuarioService:UsuarioService){
         // this.servicio = servicio;
     }
+
 
     @Get() // http://ip:puerto
     // @Get('crear')
@@ -139,129 +143,51 @@ export class AppController {
                 error: 401
             })
         }
-
-
     }
 
+    //app.controller.ts
+    @Get('login')
+    mostrarLogin(
+        @Res() res
+    ){
+        res.render('login')
+    }
 
-    @Get('inicio')
-    inicio(
-        @Res() response,
-        @Query('accion') accion: string,
-        @Query('titulo') titulo: string
-    ) {
-        let mensaje = undefined;
-        if (accion) {
-            switch (accion) {
-                case 'borrar':
-                    mensaje = `Registro ${titulo} eliminado`
-                    break;
-                case 'actualizar':
-                    mensaje = `Registro ${titulo} actualizado`
-                    break;
-                case 'crear':
-                    mensaje = `Registro ${titulo} creado`
-                    break;
-            }
+    @Post('login')
+    @HttpCode(200)
+    async ejecutarLogin(
+        @Body('username') username:string,
+        @Body('password') password:string,
+        @Res() res,
+        @Session()sesion
+    ){
+        const respuesta = await this._usuarioService
+            .autenticar(username, password);
+
+        console.log(sesion);
+
+        if(respuesta){
+            sesion.usuario = username;
+            res.send('ok');
+        }else{
+            res.redirect('login');
         }
-
-        response.render(
-            'inicio',
-            {
-                usuario: 'Adrian',
-                arreglo: this._noticiaService.arreglo, // AQUI!
-                booleano: false,
-                mensaje: mensaje
-            }
-        );
     }
 
-    @Post('eliminar/:idNoticia')
-    eliminar(
-        @Res() response,
-        @Param('idNoticia') idNoticia: string,
-    ) {
-
-        const noticiaBorrada = this._noticiaService
-            .eliminar(Number(idNoticia));
-
-        const parametrosConsulta = `?accion=borrar&titulo=${
-            noticiaBorrada.titulo
-            }`;
-
-        response.redirect('/inicio' + parametrosConsulta)
-    }
-
-    @Get('crear-noticia')
-    crearNoticiaRuta(
-        @Res() response
-    ) {
-        response.render(
-            'crear-noticia'
-        )
-    }
-
-    @Post('crear-noticia')
-    crearNoticiaFuncion(
-        @Res() response,
-        @Body() noticia: Noticia
-    ) {
-        const noticiaCreada = this._noticiaService.crear(noticia);
-
-        const parametrosConsulta1 = `?accion=crear&titulo=${
-            noticiaCreada.titulo
-            }`;
-
-        response.redirect(
-            '/inicio'+parametrosConsulta1
-        )
-    }
-
-    @Get('actualizar-noticia/:idNoticia')
-    actualizarNoticiaVista(
-        @Res() response,
-        @Param('idNoticia') idNoticia: string,
-    ) {
-        // El "+" le transforma en numero a un string
-        // numerico
-        const noticiaEncontrada = this._noticiaService
-            .buscarPorId(+idNoticia);
-
-        response
-            .render(
-                'crear-noticia',
-                {
-                    noticia: noticiaEncontrada
-                }
-            )
-
-
-    }
-
-    @Post('actualizar-noticia/:idNoticia')
-    actualizarNoticiaMetedo(
-        @Res() response,
-        @Param('idNoticia') idNoticia: string,
-        @Body() noticia: Noticia
-    ) {
-        noticia.id = +idNoticia;
-        const noticiaActualizada = this._noticiaService.actualizar(+idNoticia, noticia);
-
-        const parametrosConsulta = `?accion=actualizar&titulo=${
-            noticiaActualizada.titulo
-            }`;
-
-        response.redirect('/inicio'+parametrosConsulta);
-
+    @Get('logout')
+    logout(
+        @Res()res,
+        @Session()sesion
+    ){
+        sesion.username=undefined;
+        sesion.destroy();
+        res.redirect('login');
     }
 
 }
-
-
 export interface Usuario {
     nombre: string;
 }
-
 export interface Noticia {
     id?: number;
     titulo: string;

@@ -23,11 +23,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const app_service_1 = require("./app.service");
 const rxjs_1 = require("rxjs");
-const noticia_service_1 = require("./noticia.service");
+const noticia_service_1 = require("./noticia/noticia.service");
+const usuario_service_1 = require("./usuario/usuario.service");
 let AppController = class AppController {
-    constructor(_appService, _noticiaService) {
+    constructor(_appService, _noticiaService, _usuarioService) {
         this._appService = _appService;
         this._noticiaService = _noticiaService;
+        this._usuarioService = _usuarioService;
     }
     raiz(todosQueryParams, nombre) {
         console.log(todosQueryParams);
@@ -97,55 +99,27 @@ let AppController = class AppController {
             });
         }
     }
-    inicio(response, accion, titulo) {
-        let mensaje = undefined;
-        if (accion) {
-            switch (accion) {
-                case 'borrar':
-                    mensaje = `Registro ${titulo} eliminado`;
-                    break;
-                case 'actualizar':
-                    mensaje = `Registro ${titulo} actualizado`;
-                    break;
-                case 'crear':
-                    mensaje = `Registro ${titulo} creado`;
-                    break;
+    mostrarLogin(res) {
+        res.render('login');
+    }
+    ejecutarLogin(username, password, res, sesion) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const respuesta = yield this._usuarioService
+                .autenticar(username, password);
+            console.log(sesion);
+            if (respuesta) {
+                sesion.usuario = username;
+                res.send('ok');
             }
-        }
-        response.render('inicio', {
-            usuario: 'Adrian',
-            arreglo: this._noticiaService.arreglo,
-            booleano: false,
-            mensaje: mensaje
+            else {
+                res.redirect('login');
+            }
         });
     }
-    eliminar(response, idNoticia) {
-        const noticiaBorrada = this._noticiaService
-            .eliminar(Number(idNoticia));
-        const parametrosConsulta = `?accion=borrar&titulo=${noticiaBorrada.titulo}`;
-        response.redirect('/inicio' + parametrosConsulta);
-    }
-    crearNoticiaRuta(response) {
-        response.render('crear-noticia');
-    }
-    crearNoticiaFuncion(response, noticia) {
-        const noticiaCreada = this._noticiaService.crear(noticia);
-        const parametrosConsulta1 = `?accion=crear&titulo=${noticiaCreada.titulo}`;
-        response.redirect('/inicio' + parametrosConsulta1);
-    }
-    actualizarNoticiaVista(response, idNoticia) {
-        const noticiaEncontrada = this._noticiaService
-            .buscarPorId(+idNoticia);
-        response
-            .render('crear-noticia', {
-            noticia: noticiaEncontrada
-        });
-    }
-    actualizarNoticiaMetedo(response, idNoticia, noticia) {
-        noticia.id = +idNoticia;
-        const noticiaActualizada = this._noticiaService.actualizar(+idNoticia, noticia);
-        const parametrosConsulta = `?accion=actualizar&titulo=${noticiaActualizada.titulo}`;
-        response.redirect('/inicio' + parametrosConsulta);
+    logout(res, sesion) {
+        sesion.username = undefined;
+        sesion.destroy();
+        res.redirect('login');
     }
 };
 __decorate([
@@ -210,58 +184,36 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], AppController.prototype, "crearUsuario", null);
 __decorate([
-    common_1.Get('inicio'),
-    __param(0, common_1.Res()),
-    __param(1, common_1.Query('accion')),
-    __param(2, common_1.Query('titulo')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String]),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "inicio", null);
-__decorate([
-    common_1.Post('eliminar/:idNoticia'),
-    __param(0, common_1.Res()),
-    __param(1, common_1.Param('idNoticia')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "eliminar", null);
-__decorate([
-    common_1.Get('crear-noticia'),
+    common_1.Get('login'),
     __param(0, common_1.Res()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
-], AppController.prototype, "crearNoticiaRuta", null);
+], AppController.prototype, "mostrarLogin", null);
 __decorate([
-    common_1.Post('crear-noticia'),
+    common_1.Post('login'),
+    common_1.HttpCode(200),
+    __param(0, common_1.Body('username')),
+    __param(1, common_1.Body('password')),
+    __param(2, common_1.Res()),
+    __param(3, common_1.Session()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "ejecutarLogin", null);
+__decorate([
+    common_1.Get('logout'),
     __param(0, common_1.Res()),
-    __param(1, common_1.Body()),
+    __param(1, common_1.Session()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], AppController.prototype, "crearNoticiaFuncion", null);
-__decorate([
-    common_1.Get('actualizar-noticia/:idNoticia'),
-    __param(0, common_1.Res()),
-    __param(1, common_1.Param('idNoticia')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "actualizarNoticiaVista", null);
-__decorate([
-    common_1.Post('actualizar-noticia/:idNoticia'),
-    __param(0, common_1.Res()),
-    __param(1, common_1.Param('idNoticia')),
-    __param(2, common_1.Body()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, Object]),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "actualizarNoticiaMetedo", null);
+], AppController.prototype, "logout", null);
 AppController = __decorate([
     common_1.Controller(),
     __metadata("design:paramtypes", [app_service_1.AppService,
-        noticia_service_1.NoticiaService])
+        noticia_service_1.NoticiaService,
+        usuario_service_1.UsuarioService])
 ], AppController);
 exports.AppController = AppController;
 //# sourceMappingURL=app.controller.js.map

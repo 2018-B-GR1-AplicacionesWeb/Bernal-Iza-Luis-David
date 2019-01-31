@@ -9,16 +9,42 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
-const noticia_service_1 = require("./noticia.service");
+const typeorm_1 = require("@nestjs/typeorm");
+const noticia_entity_1 = require("./noticia/noticia-entity");
+const pagina_entity_1 = require("./pagina/pagina.entity");
+const articulo_entity_1 = require("./articulo/articulo.entity");
+const noticia_module_1 = require("./noticia/noticia.module");
+const usuario_entity_1 = require("./usuario/usuario.entity");
+const usuario__module_1 = require("./usuario/usuario..module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     common_1.Module({
-        imports: [],
-        controllers: [app_controller_1.AppController],
+        imports: [
+            typeorm_1.TypeOrmModule.forRoot({
+                type: 'mysql',
+                host: 'localhost',
+                port: 32769,
+                database: 'web',
+                username: 'david',
+                password: 'david',
+                synchronize: true,
+                dropSchema: false,
+                entities: [
+                    noticia_entity_1.NoticiaEntity,
+                    pagina_entity_1.PaginaEntity,
+                    articulo_entity_1.ArticuloEntity,
+                    usuario_entity_1.UsuarioEntity
+                ]
+            }),
+            noticia_module_1.NoticiaModule,
+            usuario__module_1.UsuarioModule
+        ],
+        controllers: [
+            app_controller_1.AppController
+        ],
         providers: [
-            app_service_1.AppService,
-            noticia_service_1.NoticiaService
+            app_service_1.AppService
         ],
     })
 ], AppModule);
